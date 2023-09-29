@@ -1,6 +1,9 @@
 ### exploration_phytoSizeShape.R ####
 ## examining size and shape changes in marine phyto data
 
+### overall idea is based on a very simplified version of the proposed approach
+### of Spencer (2015) http://dx.doi.org/10.1016/j.jtbi.2015.01.002
+
 ### approach ####
 # Import phytoplankton abundance data ==DONE==
 # Summarise abundances of individual taxa by year ==DONE==
