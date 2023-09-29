@@ -47,11 +47,11 @@ df_yr %>%
   group_by(Waterbody) %>% 
   count() -> tmp
 
-# hist(tmp$n) ### big range here.  Little to be gained by retaining poorly-represented WBs
+# hist(tmp$n, breaks = 20) ### big range here.  Little to be gained by retaining poorly-represented WBs
 
 accept <- 14 ### how many years of data is acceptable?
-tmp$kp <- ifelse(tmp$n >= accept, TRUE, FALSE)
-kp <- tmp$Waterbody[tmp$kp==TRUE]  
+tmp$kp <- ifelse(tmp$n >= accept, TRUE, FALSE) # flag WBs meeting acceptable data amount
+kp <- tmp$Waterbody[tmp$kp==TRUE]  # keep only those flagged
 rm(accept, tmp)
 
 #### trim data to retain WBs with sufficient data ####
@@ -71,8 +71,27 @@ write.csv(df_yr_trm, file="data/out/df_yr_trm.csv",row.names = FALSE)
 
 # Assuming your data frame is called filtered_data
 ### DOES calculate by WB
-df_yr_trm_norm <- df_yr_trm %>%
+df_yr_norm <- df_yr_trm %>%
   group_by(Waterbody) %>%
   mutate(across(.cols = Bacillariophyceae:Surirella, 
                 .fns = ~ . / max(., na.rm = TRUE))) %>%
   ungroup()
+
+write.csv(df_yr_norm, file="data/out/df_yr_norm.csv",row.names = FALSE)
+
+#### remove rare spp ####
+### normalised values are returned as NAs when a taxon doesn't appear at all in a given WB
+### remove these taxa
+na_threshold <- 0 #maximum number of NAs allowed
+## remove columns with more than maximum
+df_yr_norm_trm <- df_yr_norm %>%
+  select(-which(colSums(is.na(.)) > na_threshold))
+rm(na_threshold)
+write.csv(df_yr_norm_trm, file="data/out/df_yr_norm_trm.csv",
+          row.names = FALSE)## write data
+
+### tidy up ####
+# remove data
+rm(list = ls(pattern = "^df"))
+# unload packages
+detach("package:tidyverse", unload = TRUE)
