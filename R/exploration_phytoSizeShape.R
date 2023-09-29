@@ -2,17 +2,17 @@
 ## examining size and shape changes in marine phyto data
 
 ### approach ####
-# Import phytoplankton abundance data
-# Summarise abundances of individual taxa by year
+# Import phytoplankton abundance data ==DONE==
+# Summarise abundances of individual taxa by year ==DONE==
 # Extract taxa with values for each year(?)
 ## (Consider) Where there is a missing value for otherwise common spp, consider interpolating
-## abundance values
+##  abundance values
 # For each taxon, scale abundances so that each year's abundance is a proportion
-# of the maximum count for that spp. (all counts range from 0.0 to 1.0)
+#   of the maximum count for that spp. for that WB (all counts range from 0.0 to 1.0) ==DONE==
 # Calculate between year growth rates
 # Across all taxa, calculate pairwise growth rates
 # For each pairwise comparison, calculate the cosine of observed growth rates
-# against a 1-to-1 relationship
+#   against a 1-to-1 relationship
 
 ### setting up ####
 #### set metadata and load packages ####
@@ -52,4 +52,16 @@ df_yr_trm <- df_yr[df_yr$Waterbody %in% kp,] ## retain WBs with sufficient data
 df_yr_trm <- df_yr_trm %>% ## remove 'empty' species columns
   select(-where(~is.numeric(.) && sum(.) == 0))
 
-# Extract taxa with values for each year(?) ####
+# For each taxon, scale abundances so that each year's abundance is a proportion ####
+### does NOT calculate by WB
+# df_yr_trm_norm <- df_yr_trm %>%
+#   mutate(across(.cols = Bacillariophyceae:Surirella, #explicitly name which cols to normalise
+#                 .fns = ~ . / max(., na.rm = TRUE)))
+
+# Assuming your data frame is called filtered_data
+### DOES calculate by WB
+df_yr_trm_norm <- df_yr_trm %>%
+  group_by(Waterbody) %>%
+  mutate(across(.cols = Bacillariophyceae:Surirella, 
+                .fns = ~ . / max(., na.rm = TRUE))) %>%
+  ungroup()
