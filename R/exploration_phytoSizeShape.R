@@ -18,13 +18,15 @@
 #### set metadata and load packages ####
 library(tidyverse)
 
+# Import phytoplankton abundance data ####
 #### load data ####
 df0 <- openxlsx::read.xlsx(paste0("data/","PhytoChl_2000-2020 (WB+RegionalSeas).xlsx"),
                                   sheet = "Abundance2000_2020USE")
 
 # This data is in LONG format and contains abundances of >500 taxa across 112 WBs
 
-# initial data tidy ####
+# Summarise abundances of individual taxa by year ####
+#### initial data tidy ####
 df_yr <- df0 %>% 
   dplyr::select(.,-c(Index,Taxon,aphiaID,TorN,Date,DoY,Month,Time,# remove un-needed cols
                      Distance.from.WB.edge,Sample.Id,Easting,Northing,
@@ -34,8 +36,7 @@ df_yr <- df0 %>%
   pivot_wider(.,names_from = TaxonUSE, values_from = Abundance, #widen data to 1 row per WB/year
               values_fill=list(Abundance = 0))
 
-
-## how many years do we have per WB?
+#### how many years do we have per WB? ####
 df_yr %>% 
   group_by(Waterbody) %>% 
   count() -> tmp
@@ -46,7 +47,9 @@ accept <- 14 ### how many years of data is acceptable?
 tmp$kp <- ifelse(tmp$n >= accept, TRUE, FALSE)
 kp <- tmp$Waterbody[tmp$kp==TRUE]  
 
-### trim data accordingly  
+#### trim data to retain WBs with sufficient data ####
 df_yr_trm <- df_yr[df_yr$Waterbody %in% kp,] ## retain WBs with sufficient data
 df_yr_trm <- df_yr_trm %>% ## remove 'empty' species columns
   select(-where(~is.numeric(.) && sum(.) == 0))
+
+# Extract taxa with values for each year(?) ####
