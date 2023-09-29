@@ -4,11 +4,12 @@
 ### approach ####
 # Import phytoplankton abundance data ==DONE==
 # Summarise abundances of individual taxa by year ==DONE==
-# Extract taxa with values for each year(?)
-## (Consider) Where there is a missing value for otherwise common spp, consider interpolating
-##  abundance values
 # For each taxon, scale abundances so that each year's abundance is a proportion
 #   of the maximum count for that spp. for that WB (all counts range from 0.0 to 1.0) ==DONE==
+# Select appropriate taxa to continue analyses
+## Extract taxa with values for each year(?)
+## (Consider) Where there is a missing value for otherwise common spp, consider interpolating
+##  abundance values
 # Calculate between year growth rates
 # Across all taxa, calculate pairwise growth rates
 # For each pairwise comparison, calculate the cosine of observed growth rates
