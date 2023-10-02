@@ -93,6 +93,48 @@ rm(na_threshold)
 write.csv(df_yr_norm_trm, file="data/out/df_yr_norm_trm.csv",
           row.names = FALSE)## write data
 
+### split data by WB and for each WB, remove species that are not recorded in every year
+# Function to remove columns with specified number of zero values
+remove_zero_columns <- function(site_data, threshold = 1) {
+  non_zero_columns <- site_data %>%
+    select(-Regional.Sea,-Waterbody, -Year) %>%
+    select_if(~ sum(. == 0, na.rm = TRUE) <= threshold)
+  return(select(site_data, Waterbody, Year, all_of(names(non_zero_columns))))
+}
+
+## split by WB
+phytoplankton_data_split <- df_yr_norm_trm %>%
+  split(.$Waterbody)
+
+# Apply the function with a custom threshold to each site's data
+threshold <- 1  # Set your desired threshold value here
+phytoplankton_data_filtered <- lapply(phytoplankton_data_split,
+                                      remove_zero_columns,
+                                      threshold = threshold)
+
+# Combine the filtered data back into a single dataframe
+phytoplankton_data_filtered <- do.call(rbind, phytoplankton_data_filtered)
+
+##########################
+#### code not working: ###
+##########################
+##########################
+##########################
+# Calculate annual growth rate for each species for each year
+# Function to calculate growth rate for a specific site's data
+calculate_growth_rate <- function(site_data) {
+  site_data %>%
+    gather(key = "species", value = "abundance", -Waterbody, -Year) %>%
+    arrange(Waterbody, species, Year) %>%
+    group_by(Waterbody, species) %>%
+    mutate(growth_rate = ((abundance - lag(abundance, default = first(abundance))) / lag(abundance, default = first(abundance))) * 100) %>%
+    filter(Year >= 2001)  # Exclude 2000 as there is no previous year data for growth rate calculation
+}
+
+# Calculate growth rates for each site's data
+growth_rate_data <- lapply(phytoplankton_data_filtered, calculate_growth_rate)
+
+
 ### tidy up ####
 # remove data
 rm(list = ls(pattern = "^df"))
